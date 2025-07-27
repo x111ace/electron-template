@@ -27,6 +27,9 @@ PYPROJECT_EXCLUDE = {"__pycache__", "venv"}
 RSPROJECT_EXCLUDE = {"target", "Cargo.lock"}
 EXCLUDE_ALL = {"build.log", ".vscode", "dox"} | PYPROJECT_EXCLUDE | JSPROJECT_EXCLUDE | RSPROJECT_EXCLUDE
 
+# Exclusions for the tree view should be more comprehensive
+TREE_EXCLUDE = EXCLUDE_ALL | {".git"}
+
 # Language extensions for project tree statistics
 PROG_LANG_EXTS = {
     ".py": "Python", 
@@ -43,47 +46,6 @@ PROG_LANG_EXTS = {
     ".sh": "Shell Script",
     ".svelte": "Svelte",
 }
-
-# --- Helper Functions ---
-
-def _run_command(command: list[str], cwd: str, log_file_path: str, show_output: bool = True):
-    """A centralized helper to run subprocess commands with real-time logging to console and file."""
-    try:
-        process = subprocess.Popen(
-            command,
-            cwd=cwd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            encoding='utf-8',
-            errors='replace'
-        )
-
-        with open(log_file_path, 'a', encoding='utf-8') as log_file:
-            log_file.write(f"\n--- Running Command: {' '.join(command)} ---\n")
-            if show_output:
-                print(f"{DIM}--- Running Command: {' '.join(command)} ---{RRR}")
-
-            while True:
-                line = process.stdout.readline()
-                if not line:
-                    break
-                if show_output:
-                    print(line, end='')
-                log_file.write(line)
-        
-        return_code = process.wait()
-        
-        if return_code != 0:
-            raise subprocess.CalledProcessError(return_code, command)
-
-    except FileNotFoundError:
-        print(f"{RED}Error: Command '{command[0]}' not found. Is it in your PATH?{RRR}")
-        raise
-    except subprocess.CalledProcessError as e:
-        print(f"\n{RED}Error running command: {' '.join(command)}. Return code: {e.returncode}.{RRR}")
-        print(f"{YLW}Check '{log_file_path}' for the complete log.{RRR}")
-        raise e
 
 # --- Core Functions ---
 
@@ -106,7 +68,7 @@ def project_tree(root_dir: str, output: bool = False) -> str:
         except OSError:
             return
         
-        entries = [e for e in entries if e not in EXCLUDE_ALL]
+        entries = [e for e in entries if e not in TREE_EXCLUDE]
         
         for i, entry in enumerate(entries):
             path = os.path.join(dir_path, entry)
@@ -121,14 +83,15 @@ def project_tree(root_dir: str, output: bool = False) -> str:
                 stats["files"]["total"] += 1
                 ext = os.path.splitext(entry)[1]
                 lang = PROG_LANG_EXTS.get(ext)
-                lines = count_lines(path)
                 
                 if lang:
+                    lines = count_lines(path)
                     lang_stats = stats["files"]["by_type"].setdefault(lang, {'files': 0, 'lines': 0})
                     lang_stats['files'] += 1
                     lang_stats['lines'] += lines
-                
-                tree_lines.append(f"{prefix}{connector}{entry} :: {GRN}{lines}{RRR} lines")
+                    tree_lines.append(f"{prefix}{connector}{entry} :: {GRN}{lines}{RRR} lines")
+                else:
+                    tree_lines.append(f"{prefix}{connector}{entry}")
 
     abs_root = os.path.abspath(root_dir)
     root_label = f"{BLU}{os.path.basename(abs_root.rstrip(os.sep))}{RRR}/"
@@ -215,6 +178,8 @@ def clean_project(root_dir: str, output: bool = False):
                     if output:
                         print(f"{RED}Failed to remove {item_path}: {e}{RRR}")
 
+# --- Helper Functions ---
+
 def stop_dev_servers(root_dir: str, output: bool = False):
     """Stops running development servers by aggressively cleaning up lingering processes."""
     if output:
@@ -241,6 +206,57 @@ def stop_dev_servers(root_dir: str, output: bool = False):
     if output:
         print(f"{CYN}Waiting for processes to terminate fully...{RRR}")
     time.sleep(3) # A brief pause to allow OS to release file handles.
+
+def start_dev_servers(root_dir: str, output: bool = False):
+    """Launches the development server and keeps the script running."""
+    if output:
+        print(f"\n{BRT}{CYN}--- Starting Development Environment ---{RRR}")
+        print(f"{YLW}The server is now running and watching for file changes.{RRR}")
+        print(f"{YLW}Press Ctrl+C in this terminal to stop the server.{RRR}")
+    
+    _run_command(["npm.cmd", "run", "dev"], root_dir, LOG_FILE, show_output=output)
+    
+    if output:
+        print(f"\n{GRN}Development server process ended.{RRR}")
+
+def _run_command(command: list[str], cwd: str, log_file_path: str, show_output: bool = True):
+    """A centralized helper to run subprocess commands with real-time logging to console and file."""
+    try:
+        process = subprocess.Popen(
+            command,
+            cwd=cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding='utf-8',
+            errors='replace'
+        )
+
+        with open(log_file_path, 'a', encoding='utf-8') as log_file:
+            log_file.write(f"\n--- Running Command: {' '.join(command)} ---\n")
+            if show_output:
+                print(f"{DIM}--- Running Command: {' '.join(command)} ---{RRR}")
+
+            while True:
+                line = process.stdout.readline()
+                if not line:
+                    break
+                if show_output:
+                    print(line, end='')
+                log_file.write(line)
+        
+        return_code = process.wait()
+        
+        if return_code != 0:
+            raise subprocess.CalledProcessError(return_code, command)
+
+    except FileNotFoundError:
+        print(f"{RED}Error: Command '{command[0]}' not found. Is it in your PATH?{RRR}")
+        raise
+    except subprocess.CalledProcessError as e:
+        print(f"\n{RED}Error running command: {' '.join(command)}. Return code: {e.returncode}.{RRR}")
+        print(f"{YLW}Check '{log_file_path}' for the complete log.{RRR}")
+        raise e
 
 # --- Project Lifecycle Functions ---
 
@@ -281,20 +297,6 @@ def build_project(root_dir: str, output: bool = False):
     if output:
         print(f"{GRN}Production build completed successfully.{RRR}")
 
-
-def start_dev_servers(root_dir: str, output: bool = False):
-    """Launches the development server and keeps the script running."""
-    if output:
-        print(f"\n{BRT}{CYN}--- Starting Development Environment ---{RRR}")
-        print(f"{YLW}The server is now running and watching for file changes.{RRR}")
-        print(f"{YLW}Press Ctrl+C in this terminal to stop the server.{RRR}")
-    
-    _run_command(["npm.cmd", "run", "dev"], root_dir, LOG_FILE, show_output=output)
-    
-    if output:
-        print(f"\n{GRN}Development server process ended.{RRR}")
-
-
 def init_project(ROOT, output=False):
     """
     Initializes the project fully by ensuring servers are stopped,
@@ -327,13 +329,21 @@ def main():
         description="A utility script for managing your Electron/SvelteKit project.",
         formatter_class=argparse.RawTextHelpFormatter
     )
-    parser.add_argument("-t", "--tree", action="store_true", help="Display the project's file tree with statistics.")
-    parser.add_argument("-c", "--clean", action="store_true", help="Clean all build artifacts and dependencies.")
-    parser.add_argument("-x", "--stop", action="store_true", help="Stop any running development servers.")
-    parser.add_argument("-f", "--deps", action="store_true", help="Clean and reinstall all npm dependencies.")
-    parser.add_argument("-b", "--build", action="store_true", help="Build the project for production.")
-    parser.add_argument("-d", "--dev", action="store_true", help="Start the live development server.")
-    parser.add_argument("-i", "--init", action="store_true", help="Initialize the project fully (clean, deps, build, dev).")
+    parser.add_argument("-t", "--tree", 
+        action="store_true", help="Display the project's file tree with statistics."
+    ); parser.add_argument("-c", "--clean", 
+        action="store_true", help="Clean all build artifacts and dependencies."
+    ); parser.add_argument("-x", "--stop", 
+        action="store_true", help="Stop any running development servers."
+    ); parser.add_argument("-f", "--deps", 
+        action="store_true", help="Clean and reinstall all npm dependencies."
+    ); parser.add_argument("-b", "--build", 
+        action="store_true", help="Build the project for production."
+    ); parser.add_argument("-d", "--dev", 
+        action="store_true", help="Start the live development server."
+    ); parser.add_argument("-i", "--init", 
+        action="store_true", help="Initialize the project fully (clean, deps, build, dev)."
+    )
     
     args = parser.parse_args()
 

@@ -14,33 +14,37 @@ python xyzutils.py -d
 ```
 ```
 {
-    "folders": 17,
+    "folders": 20,
     "files": {
-        "total": 43,
+        "total": 44,
         "by_type": {
+            "TypeScript": {
+                "files": 4,
+                "lines": 187
+            },
+            "CSS": {
+                "files": 3,
+                "lines": 68
+            },
+            "Svelte": {
+                "files": 5,
+                "lines": 133
+            },
+            "Jupyter Notebook": {
+                "files": 1,
+                "lines": 215
+            },
+            "HTML": {
+                "files": 1,
+                "lines": 14
+            },
             "JavaScript": {
                 "files": 2,
                 "lines": 34
             },
             "Python": {
                 "files": 1,
-                "lines": 476
-            },
-            "TypeScript": {
-                "files": 4,
-                "lines": 186
-            },
-            "HTML": {
-                "files": 1,
-                "lines": 13
-            },
-            "Jupyter Notebook": {
-                "files": 1,
-                "lines": 215
-            },
-            "CSS": {
-                "files": 3,
-                "lines": 68
+                "lines": 376
             }
         }
     }
@@ -57,19 +61,19 @@ electron-gui/
 │   ├── renderer/
 │   │   ├── lib/
 │   │   │   ├── COMPS.md                            # Documentation for reusable components and utilities
-│   │   │   └── mouseEffects.ts :: 68 lines         # Svelte action for global pixel explosion click effects
+│   │   │   └── mouseEffects.ts :: 69 lines         # Svelte action for global pixel explosion click effects
 │   │   ├── routes/
 │   │   │   ├── entry/
 │   │   │   │   ├── styles/
 │   │   │   │   │   └── entry-page.css :: 34 lines  # Styles specific to entry page (buttons, layout)
-│   │   │   │   └── +page.svelte :: 26 lines        # Entry page route (/entry) with welcome message and navigation button
+│   │   │   │   └── +page.svelte :: 24 lines        # Entry page route (/entry) with welcome message and navigation button
 │   │   │   ├── game/
 │   │   │   │   ├── styles/
 │   │   │   │   │   └── game-page.css :: 15 lines   # Styles specific to game page (draggable box)
-│   │   │   │   ├── +page.svelte :: 30 lines        # Game page route (/game) with draggable box and ESC navigation
-│   │   │   │   └── Draggable.svelte :: 55 lines    # Reusable drag-and-drop wrapper component with mouse handling
-│   │   │   ├── +layout.svelte :: 7 lines           # Root layout with global mouse effects
-│   │   │   ├── +page.svelte :: 12 lines            # Root page route (/) that redirects to entry page
+│   │   │   │   ├── +page.svelte :: 28 lines        # Game page route (/game) with draggable box and ESC navigation
+│   │   │   │   └── Draggable.svelte :: 58 lines    # Reusable drag-and-drop wrapper component with mouse handling
+│   │   │   ├── +layout.svelte :: 9 lines           # Root layout with global mouse effects
+│   │   │   ├── +page.svelte :: 14 lines            # Root page route (/) that redirects to entry page
 │   │   │   └── ROUTES.md                           # Documentation explaining SvelteKit file-based routing system
 │   │   ├── static/
 │   │   │   ├── fonts/
@@ -81,18 +85,18 @@ electron-gui/
 │   │   │   └── STATIC.md                           # Documentation for static asset management in SvelteKit
 │   │   ├── utils/
 │   │   │   └── UTILS.md                            # Documentation for renderer utility functions (currently empty)
-│   │   ├── RENDERER.md                             # Documentation explaining SvelteKit frontend architecture
 │   │   ├── api.ts :: 18 lines                      # TypeScript interfaces for electronAPI and IPC type safety
-│   │   └── app.html :: 13 lines                    # SvelteKit main HTML template wrapping all pages
+│   │   ├── app.html :: 14 lines                    # SvelteKit main HTML template wrapping all pages
+│   │   └── RENDERER.md                             # Documentation explaining SvelteKit frontend architecture
 │   ├── shared/
 │   │   └── SHARED.md                               # Documentation for code shared between main and renderer processes
 │   └── CODE.md                                     # Project philosophy and UI-first development principles
 ├── .gitignore                                      # Git ignore patterns for build artifacts and dependencies
 ├── BUILDME.md                                      # Complete build instructions and migration history documentation
-├── README.md                                       # Project overview with quick start commands and file tree
 ├── package.json                                    # NPM dependencies, scripts, and SvelteKit configuration
+├── README.md                                       # Project overview with quick start commands and file tree
 ├── svelte.config.js :: 28 lines                    # SvelteKit configuration with static adapter and custom paths
 ├── tsconfig.json                                   # Root TypeScript config extending SvelteKit's generated config
 ├── vite.config.js :: 6 lines                       # Vite configuration for SvelteKit integration
-└── xyzutils.py :: 476 lines                        # Python utility for project management (init, dev, clean, build)
+└── xyzutils.py :: 376 lines                        # Python utility for project management (init, dev, clean, build)
 ```
