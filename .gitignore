@@ -1,0 +1,34 @@
+# SvelteKit specific
+.svelte-kit/
+.env
+.env.*
+
+# Node / Dependencies
+node_modules/
+package-lock.json
+
+# Build output
+dist/
+
+# Logs and temporary files
+*.log
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pids.json
+
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+/venv/
+
+# VSCode
+.vscode/
+
+# Cursor
+.cursorrules
+.cursor/

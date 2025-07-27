@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "es2020",
+    "moduleResolution": "node",
+    "target": "es2020",
+    "outDir": "../dist/main",
+    "noEmit": false
+  },
+  "include": [
+    "../src/main/**/*"
+  ],
+  "exclude": [
+    "../src/main/preload.ts"
+  ]
+} 
